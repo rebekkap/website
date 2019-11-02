@@ -4,8 +4,8 @@ This is my freakin website.
 
 ### Markdown
 
-I like websites... and Pandas  
-![Pandas](https://github.com/tograh/testrepository/3DTest.png)
+I like websites...
+and ![Pandas](https://raw.githubusercontent.com/rebekkap/website/master/images/hipeeps.jpg)
 
 ### Jekyll Themes
 
