@@ -1,0 +1,40 @@
+<script>
+  /**
+   * get data from url
+   */
+  const us='https://covidtracking.com/api/us/daily';
+  const or='https://covidtracking.com/api/states/daily?state=OR';
+
+  function render(data) {
+      const compare = [];
+      const usData = data[0];
+      const stateData = data[1];
+      for(let i=0; i< usData.length; i++) {
+	  if(i >= stateData.length) break;
+          const usd = usData[i].death ? usData[i].death : 0;
+          const std = stateData[i].death ? stateData[i].death : 0;
+	  const r = {
+	      date: usData[i].date,
+	      death: { us: usd, s: std, diff: usd - std }
+	  };
+	  compare.push(r);
+      }
+      console.log(compare.reverse());
+  }
+  
+  async function fetchAndRenderData(urls) {
+      // fetch all the URLs in parallel
+      const textPromises = urls.map(async url => {
+	  const response = await fetch(url);
+	  return await response.json();
+      });
+
+      const data = [];  
+      for (const textPromise of textPromises) {
+	  data.push(await textPromise);
+      }
+      render(data);
+  }
+
+  fetchAndRenderData([us, or]);
+</script>
