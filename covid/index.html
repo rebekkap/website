@@ -1,40 +1,82 @@
-<script>
+<!DOCTYPE html>
+<html>
+  <head>
+  <title>Covid Casualty Counter</title>
+  <style>
+  #value {
+    font-size: 50px;
+  }
+  </style>
+  </head>
+  <body>
+    <div id="output">HI</div>
+  </body>
+  <script>
   /**
    * get data from url
    */
   const us='https://covidtracking.com/api/us/daily';
   const or='https://covidtracking.com/api/states/daily?state=OR';
-
-  function render(data) {
-      const compare = [];
-      const usData = data[0];
-      const stateData = data[1];
-      for(let i=0; i< usData.length; i++) {
-	  if(i >= stateData.length) break;
-          const usd = usData[i].death ? usData[i].death : 0;
-          const std = stateData[i].death ? stateData[i].death : 0;
-	  const r = {
-	      date: usData[i].date,
-	      death: { us: usd, s: std, diff: usd - std }
-	  };
-	  compare.push(r);
+  
+  /** render the data on the web page */
+  function render(preparedData) {
+      console.log(preparedData);
+      const doc = document.getElementById('output');
+      const pd = preparedData;
+      let delay = pd.length * 11;
+      let i = 0;
+      function animate() {
+	  doc.innerHTML = `${pd[i].date}: Deaths USA v. Oregon: ${pd[i].death.us} vs. ${pd[i].death.s} - OR ${pd[i].death.pt}% `;
+	  delay -= 6;
+	  i++;
+	  if (i < pd.length) {
+	     setTimeout(animate, delay);
+	  }
       }
-      console.log(compare.reverse());
+      animate();
+  }
+
+  /** prepare data -- gather and convert into shape you want */
+  function prepare(data) {
+    const preparedData = [];
+    const usData = data[0].reverse();
+    const stateData = data[1].reverse();
+    let i = 0; let j = 0;
+    while(i < usData.length) {
+      if(j >= stateData.length) break;
+      if(usData[i].date !== stateData[j].date) {
+          i++;
+          continue;
+      }
+      const usd = usData[i].death ? usData[i].death : 0;
+      const std = stateData[j].death ? stateData[j].death : 0;
+      const pt  = usd > 0 ? std / usd : 0.00;
+      const r = {
+        date: usData[i].date,
+          death: { us: usd, s: std, diff: usd - std, pt: pt }
+      };
+      preparedData.push(r);
+      i++; j++;
+    }
+    render(preparedData);
   }
   
+  /** get the data from the covid web service */
   async function fetchAndRenderData(urls) {
-      // fetch all the URLs in parallel
-      const textPromises = urls.map(async url => {
-	  const response = await fetch(url);
-	  return await response.json();
-      });
+    // fetch all the URLs in parallel
+    const textPromises = urls.map(async url => {
+      const response = await fetch(url);
+      return await response.json();
+    });
 
-      const data = [];  
-      for (const textPromise of textPromises) {
-	  data.push(await textPromise);
-      }
-      render(data);
+    const data = [];  
+    for (const textPromise of textPromises) {
+      data.push(await textPromise);
+    }
+    prepare(data);
   }
 
+  /** entry point: start the process */
   fetchAndRenderData([us, or]);
-</script>
+  </script>
+</html>
