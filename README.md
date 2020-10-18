@@ -1,6 +1,6 @@
 ## Welcome to Peep's Pages
 
-This is my freakin website.
+This is my wicked freakin website.
 
 ### Markdown
 
